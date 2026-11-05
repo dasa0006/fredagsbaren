@@ -1,0 +1,43 @@
+x-app: &app
+  build:
+    context: .
+  image: fredagsbar:latest
+
+services:
+  api:
+    <<: *app
+    command: ["python", "api.py"]
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/events', timeout=2)",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  frontend:
+    <<: *app
+    command:
+      [
+        "streamlit",
+        "run",
+        "app.py",
+        "--server.address=0.0.0.0",
+        "--server.port=8501",
+        "--server.headless=true",
+      ]
+    environment:
+      # Inde i Docker taler frontenden med API-containeren via servicenavnet.
+      API_URL: http://api:5000
+    ports:
+      - "8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy

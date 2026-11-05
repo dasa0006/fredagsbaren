@@ -1,0 +1,9 @@
+# Alt, der ikke skal med ind i Docker-image'et.
+.venv/
+.git/
+.gitignore
+.dockerignore
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
